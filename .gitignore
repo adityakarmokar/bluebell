@@ -1,6 +1,5 @@
 /.phpunit.cache
 /node_modules
-.env
 .env.backup
 .env.production
 Homestead.json
