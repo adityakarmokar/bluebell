@@ -8,6 +8,7 @@ use App\Models\TokenDocument;
 use App\Models\TokenStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class UserServiceTokenController extends Controller
 {
@@ -17,7 +18,7 @@ class UserServiceTokenController extends Controller
         $selfId = auth()->user()->id;
 
 		$imageDomain = env('APP_URL').'uploads/';
-        $tokens = Token::where('is_active', 1)->where('user_id', $selfId)->select('id','service_id','user_id','token','status','payment','filed_document','created_at', 'refund_amount', 'payable_amount', 'consultency_fees')->with('service:id,name,service_icons,service_banner,service_details', 'tokenStatus')->get();
+        $tokens = Token::where('is_active', 1)->where('user_id', $selfId)->select('id','service_id','user_id','token','status','payment','filed_document','created_at', 'refund_amount', 'payable_amount', 'consultency_fees')->with('service:id,name,service_icons,service_banner,service_details', 'tokenStatus')->orderBy('id', 'desc')->get();
       
       	foreach($tokens as $token){
           $token->status = $this->getStatusBadge($token->tokenStatus()->latest()->value('status'));
@@ -56,6 +57,30 @@ class UserServiceTokenController extends Controller
                 return 'Document Delivered';
             default:
                 return 'Unknown Status';
+        }
+    }
+  
+  	private function getStatusBadgeDescription($status)
+    {
+        switch ($status) {
+            case 1:
+                return 'Token has been generated successfully.';
+            case 2:
+                return 'Data validation completed.';
+            case 3:
+                return 'Required documents have been uploaded successfully.';
+            case 4:
+                return 'Token finalization completed.';
+            case 5:
+                return 'Payment is done for this token.';
+            case 6:
+                return 'Filing done!';
+            case 7:
+                return 'Verification completed!';
+            case 8:
+                return 'Hooray! All tasks are completed, and documents are delivered!';
+            default:
+                return 'No additional details available.';
         }
     }
 
@@ -126,7 +151,12 @@ class UserServiceTokenController extends Controller
             'comment' => 'nullable|string',                      
         ]);
 
-        $token = Token::where('id', $request->token_id)->first();      	
+        $token = Token::where('id', $request->token_id)->first();    
+      
+      	$isToken_document = TokenDocument::where('token_id', $token->id)->where('user_id', $token->user_id)->where('service_id', $token->service->id)->first();
+      	if($isToken_document){
+          $isToken_document->delete();
+        }
       
         $additionalDocument = [];
         $validationRules = [];
@@ -273,5 +303,116 @@ class UserServiceTokenController extends Controller
       
     }
 
+  	public function token_journey(Request $request)
+    {
+        $token_journey = TokenStatus::where('token_id', $request->token_id)
+            ->select('id', 'token_id', 'status', 'updated_at')
+            ->get();
+
+        if ($token_journey->isNotEmpty()) {
+            $token_journey = $token_journey->map(function ($journey) {
+                return [
+                    'id' => $journey->id,
+                    'token_id' => $journey->token_id,
+                    'status' => $journey->status,
+                    'updated_at' => \Carbon\Carbon::parse($journey->updated_at)->format('l j M, h:i A'),
+                    'current_status' => $this->getStatusBadge($journey->status),
+                  	'current_status_description' => $this->getStatusBadgeDescription($journey->status)
+                ];
+            });
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Success',
+                'data' => $token_journey
+            ]);
+        }
+
+        return response()->json([
+            'status' => false,
+            'message' => 'Failed',
+            'data' => []
+        ]);
+    }
+
+  
+  	public function fetch_token_documents(Request $request)
+    {
+    
+      $userId = auth()->user()->id;            
+      $token_documents = TokenDocument::where('user_id', $userId)->where('token_id', $request->token_id)->first();
+      
+      if($token_documents){ 
+        
+          $token_documents->form_16_a = json_decode($token_documents->form_16_a) ?? [];
+          $token_documents->annex_use = json_decode($token_documents->annex_use) ?? [];
+          $token_documents->form_16_parantal = json_decode($token_documents->form_16_parantal) ?? [];
+          $token_documents->public_investment = json_decode($token_documents->public_investment) ?? [];
+          $token_documents->bank_statement = json_decode($token_documents->bank_statement) ?? [];
+          $token_documents->sales_purchase	 = json_decode($token_documents->sales_purchase	) ?? [];          
+          $token_documents->makeHidden('action_by', 'deleted_at', 'created_at', 'updated_at') ?? [];          
+        
+          return response()->json(['status'=>true, 'message'=>'Success', 'data'=>$token_documents]);        
+        
+      }
+      
+      return response()->json(['status'=>false, 'message'=>'Failed', 'data'=>[]]);
+      
+    }
+  
+  	public function token_fetch_amount(Request $request)
+    {
+      
+      $tokenId = $request->tokenId ?? null;
+      
+      if($tokenId){
+        
+        $token = Token::where('id', $tokenId)->first();
+        
+        if($token){
+          $data = [
+            'refund_amount' => $token->refund_amount,
+            'payable_amount' => $token->payable_amount,
+            'consultency_fees' => $token->consultency_fees,
+          ];
+        }
+        
+        return response()->json([
+          'status' => true,
+          'message' => 'success', 
+          'data' => $data
+        ]);
+      }
+      
+      return response()->json([
+        'status' => false,
+        'message' => 'Failed', 
+        'data' => []
+      ]);
+      
+    }
+  
+  	public function token_submit_amount(Request $request)
+    {
+    
+      $tokenId = $request->tokenId ?? null;
+      $refund_amount = $request->refund_amount ?? null;
+      $payable_amount = $request->payable_amount ?? null;
+      $consultency_fees_amount = $request->consultency_fees_amount ?? null;
+      
+      $token = Token::where('id', $tokenId)->first();
+      if($token){
+        $token->update([
+          'refund_amount' => $refund_amount,
+          'payable_amount' => $payable_amount,
+          'consultency_fees' => $consultency_fees_amount
+        ]);
+        
+        return response()->json(['status'=>true, 'message'=>'success']);
+      }
+      
+      return response()->json(['status'=>false, 'message'=>'failed']);
+      
+    }
     
 }

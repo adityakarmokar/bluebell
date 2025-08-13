@@ -61,7 +61,7 @@ class HomeBannerController extends Controller
         'status' =>true,
         'message' => 'success',
         'data' => $banners,
-        'imageDomain' => 'https://bluebellgroup.co.in/uploads/'
+        'imageDomain' => 'https://bluebell.bluebellgroup.co.in/uploads/'
       ]);
     }
     

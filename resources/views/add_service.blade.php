@@ -59,8 +59,8 @@
             <span style="color: red">{{ $message }}</span>
             @enderror
         </div>
-        <hr>
-        <h6>2. Required Documents List</h6>
+        {{-- <hr>
+        <h6>2. Additional Required Documents List</h6>
         <div class="form-repeater">
             <div class="mb-0">
                 <a class="btn btn-primary" data-repeater-create>
@@ -68,29 +68,54 @@
                 <span class="align-middle">Add</span>
                 </a>
             </div><br>
+
+            @foreach ($data->serviceDocuments as $docIndex => $item)
+
+                <div class="row" id="{{$docIndex+50}}">
+                    <input type="hidden" name="group-a[{{$docIndex+50}}][doc_id]" value="{{$item->id}}">
+                    <div class="mb-3 col-lg-6 col-xl-3 col-12 mb-0">
+                        <label class="form-label" for="form-repeater-1-1">Document Name</label>
+                        <input type="text" name="group-a[{{$docIndex+50}}][doc_name]" id="form-repeater-1-1" class="form-control" placeholder="Required Document name" value="{{$item->doc_name}}" />
+                    </div>
+
+                    <div class="mb-3 col-lg-6 col-xl-3 col-12 mb-0">
+                        <label class="form-label" for="form-repeater-1-1">Document Icon</label>
+                        <input type="file" name="group-a[{{$docIndex+50}}][doc_icon]" id="form-repeater-1-1" class="form-control" placeholder="Required Document name" />
+                        <input type="hidden" name="group-a[{{$docIndex+50}}][doc_icon_hidden]" value="{{$item->doc_icon}}" />
+                        @if (!empty($item->doc_icon))
+                            <img src="{{ url('uploads/' . $item->doc_icon) }}" alt="" width="100px" height="100px">
+                        @endif
+                    </div>                            
+                    <div class="mb-3 col-lg-12 col-xl-2 col-12 d-flex align-items-start mb-0">
+                        <a class="btn btn-label-danger mt-4 item_remove" data-row="{{$docIndex+50}}">
+                            <i class="ti ti-x ti-xs me-1"></i>
+                            <span class="align-middle">Remove</span>
+                        </a>
+                    </div>
+                </div>                           
+            @endforeach                                                         
             <div data-repeater-list="group-a">
-                <div data-repeater-item>
+                <div data-repeater-item>                  
                     <div class="row">
                         <div class="mb-3 col-lg-6 col-xl-3 col-12 mb-0">
                             <label class="form-label" for="form-repeater-1-1">Document Name</label>
-                            <input type="text" name="group-a[1][doc_name]" id="form-repeater-1-1" class="form-control" placeholder="Required Document name" />
+                            <input type="text" name="group-a[50][doc_name]" id="form-repeater-1-1" class="form-control" placeholder="Required Document name" />
                         </div>
-                        
+
                         <div class="mb-3 col-lg-6 col-xl-3 col-12 mb-0">
                             <label class="form-label" for="form-repeater-1-1">Document Icon</label>
-                            <input type="file" name="group-a[1][doc_icon]" id="form-repeater-1-1" class="form-control" placeholder="Required Document name" />
-                        </div>
-                        
-                        <div class="mb-3 col-lg-12 col-xl-2 col-12 d-flex align-items-center mb-0">
-                            <button class="btn btn-label-danger mt-4" data-repeater-delete>
+                            <input type="file" name="group-a[50][doc_icon]" id="form-repeater-1-1" class="form-control" placeholder="Required Document name" />                            
+                        </div>                            
+                        <div class="mb-3 col-lg-12 col-xl-2 col-12 d-flex align-items-start mb-0">
+                            <a class="btn btn-label-danger mt-4" data-repeater-delete>
                                 <i class="ti ti-x ti-xs me-1"></i>
                                 <span class="align-middle">Delete</span>
-                            </button>
+                            </a>
                         </div>
-                    </div>                
-                </div>            
+                    </div>                         
+                </div>                    
             </div>
-        </div>        
+        </div>   --}}
 
       <div class="pt-4">
         <button type="submit" class="btn btn-primary me-sm-3 me-1">Add</button>

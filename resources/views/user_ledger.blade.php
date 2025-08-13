@@ -30,21 +30,21 @@
           <tr>
             <th>#</th>
             <th>Token</th>
-            <th>Type</th>                       
-            <th>Transaction Id </th>            
+            <th>Service</th>                       
+            <th>Method</th>            
             <th>Amount</th>  
             <th>Date</th>          
           </tr>
         </thead>
         <tbody>
-            @if (isset($user) && $user != null)                
-                @foreach ($user->userLedger as $payment)
+            @if (isset($ledger) && $ledger != null)                
+                @foreach ($ledger as $payment)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td> {{ optional($payment->userToken)->token ?? '' }} </td>
-                    <td>{{ $payment->payment_type ?? '' }}</td>                    
-                    <td>{{ $payment->transaction_id ?? '' }}</td>                    
-                    <td>{{ $payment->amount ?? '' }}</td>
+                    <td> {{ $payment->token->token ?? '' }} </td>
+                    <td>{{ $payment->service->name ?? '' }}</td>                    
+                    <td>{{ $payment->type ?? 'N/A' }}</td>                    
+                    <td><span class="badge rounded-pill bg-success bg-glow">₹ {{ $payment->amount ?? $payment->status }}</span></td>
                     <td>{{ \Carbon\Carbon::parse($payment->created_at)->format('d M Y')  }}</td>                                    
                 </tr>
                 @endforeach

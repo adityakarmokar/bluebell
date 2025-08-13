@@ -25,7 +25,7 @@ return new class extends Migration
             $table->longText('gateway_response')->nullable();
             $table->timestamp('payment_date')->nullable();
             $table->string('refund_status')->default('not_requested');
-            $table->timestamp('refund_date')->nullable();
+            $table->timestamp('refund_date')->nullable();          	
             $table->softDeletes();
             $table->timestamps();
         });

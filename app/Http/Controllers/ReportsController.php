@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Token;
 use App\Models\User;
+use App\Models\PaymentHistory;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class ReportsController extends Controller
 {
@@ -17,12 +19,12 @@ class ReportsController extends Controller
 
         $request->validate([
             'startDate' => 'nullable|date|required_with:endDate',
-            'endDate' => 'nullable|date|after:startDate|required_with:startDate',
+            'endDate' => 'nullable|date|required_with:startDate',
         ]);
 
         $status = $request->status ?? null;  
-        $startDate = $request->startDate ?? null; 
-        $endDate = $request->endDate ?? null;
+        $startDate = Carbon::parse($request->startDate)->startOfDay();
+        $endDate = Carbon::parse($request->endDate)->endOfDay();
 
         $data = null;
         if($startDate && $endDate){
@@ -42,8 +44,9 @@ class ReportsController extends Controller
 
             $query->whereBetween('created_at', [$startDate, $endDate]);
             $data = $query->orderBy('id', 'ASC')->get();           
-        }
+        }            
 
+      //dd($data);
 
         return view("reports", compact('data'));
     }
@@ -51,8 +54,11 @@ class ReportsController extends Controller
 
     public function user_ledger(User $user)
     {
-        $user = $user->load('userLedger.userToken');        
-        return view('user_ledger', compact('user'));
+        $user = $user->load('userLedger.userToken');  
+      	
+      	$ledger = PaymentHistory::where('user_id', $user->id)->with('token:id,token', 'service')->orderBy('id', 'desc')->get();
+      
+        return view('user_ledger', compact('ledger', 'user'));
     }
 
     /**

@@ -65,7 +65,7 @@
             <span style="color: red">{{ $message }}</span>
             @enderror
         </div>
-        <hr>
+        {{-- <hr>
         <h6>2. Additional Required Documents List</h6>
         <div class="form-repeater">
             <div class="mb-0">
@@ -74,16 +74,16 @@
                 <span class="align-middle">Add</span>
                 </a>
             </div><br>
-            
+
             @foreach ($data->serviceDocuments as $docIndex => $item)
-                
+
                 <div class="row" id="{{$docIndex+50}}">
                     <input type="hidden" name="group-a[{{$docIndex+50}}][doc_id]" value="{{$item->id}}">
                     <div class="mb-3 col-lg-6 col-xl-3 col-12 mb-0">
                         <label class="form-label" for="form-repeater-1-1">Document Name</label>
                         <input type="text" name="group-a[{{$docIndex+50}}][doc_name]" id="form-repeater-1-1" class="form-control" placeholder="Required Document name" value="{{$item->doc_name}}" />
                     </div>
-                    
+
                     <div class="mb-3 col-lg-6 col-xl-3 col-12 mb-0">
                         <label class="form-label" for="form-repeater-1-1">Document Icon</label>
                         <input type="file" name="group-a[{{$docIndex+50}}][doc_icon]" id="form-repeater-1-1" class="form-control" placeholder="Required Document name" />
@@ -107,7 +107,7 @@
                             <label class="form-label" for="form-repeater-1-1">Document Name</label>
                             <input type="text" name="group-a[50][doc_name]" id="form-repeater-1-1" class="form-control" placeholder="Required Document name" />
                         </div>
-                        
+
                         <div class="mb-3 col-lg-6 col-xl-3 col-12 mb-0">
                             <label class="form-label" for="form-repeater-1-1">Document Icon</label>
                             <input type="file" name="group-a[50][doc_icon]" id="form-repeater-1-1" class="form-control" placeholder="Required Document name" />                            
@@ -121,7 +121,7 @@
                     </div>                         
                 </div>                    
             </div>
-        </div>        
+        </div>   --}}      
 
       <div class="pt-4">
         <button type="submit" class="btn btn-primary me-sm-3 me-1">Update</button>

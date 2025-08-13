@@ -97,7 +97,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: "{{url('user-delete')}}",
+                    url: "{{url('announcement-delete')}}",
                     method: "POST",
                     data: {
                         user_id: id,

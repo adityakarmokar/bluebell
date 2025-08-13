@@ -1,4 +1,4 @@
-@section('title', 'Tokens')
+ @section('title', 'Tokens')
 @section('description', 'Tokens description')
 @section('keywords', 'Tokens')
 
@@ -10,6 +10,7 @@
 @include('layouts.header')
 @include('layouts.sidebar')      
 @include('layouts.nav') 
+@include('layouts.edit_token_amount');
 
 <style>
   .thumbnail {
@@ -19,7 +20,7 @@
       transform: scale(1.05);
   }
   #hidden-text {
-      visibility: hidden; /* Default state: hidden */
+      visibility: hidden; 
   }
   .input-group-text {
       cursor: pointer;
@@ -283,7 +284,11 @@
         
       <div class="card mb-4">
         <div class="card-header">
-          <h6 class="card-title m-0"><b>Payment Status</b></h6>         
+          <div class="d-flex justify-content-between">
+          	<h6 class="card-title m-0"><b>Payment Status</b></h6>         
+            <button type="button" class="btn btn-sm btn-primary waves-effect waves-light" id="change_payment_amount_button" data-bs-toggle="modal" data-bs-target="#tokenAmountChangeModal" data-tokenId="{{ $token->id }}">Edit Token Amount</button>
+          </div>
+          
           @if (in_array(5, $statuses) && $token->payment != null)              
             <p style="margin: 0 !important;">Paid</p>             
           @endif          
@@ -311,7 +316,14 @@
               <p>Consultency Fees: </p>&nbsp;
               <p>₹ {{ number_format($token->consultency_fees, 2) }}</p>  
             </div>   
-            
+          
+          	@if($token->partially_paid != null && $token->partially_paid > 0)
+          	<div class="d-flex justify-content-start" style="color:green;">              
+              <p>Partially Paid: </p>&nbsp;
+              <p>₹ {{ number_format($token->partially_paid, 2) }}</p>                                
+            </div>                
+            @endif
+          	<a href="{{route('user_ledger', ['user'=>$token->user->id])}}" class="btn btn-info btn-sm">Ledger</a>      	
           @endif
         </div>
       </div>
@@ -486,14 +498,18 @@
         <form action="{{url('change-payment-status')}}" method="POST">
           @csrf
           <div class="row g-2 align-items-center">          
-              <div class="col mb-0">  
+              <div class="col-md-4 mb-0">  
                 <input type="hidden" name="token_id" value="{{$token->id}}">          
-                <select id="" class="select2 form-select token-status" name="payment_status" data-allow-clear="true">                
+                <select id="cashMarkPaidSelect" class="select2 form-select token-status" name="payment_status" data-allow-clear="true">                
                   <option value="">Change Status</option>
                   <option value="1">Mark Paid</option>
+                  <option value="2">Partial Payment</option>
                 </select>
               </div>
-              <div class="col mb-0">            
+              <div class="col-md-4 mb-0" id="partial_div" style="display:none;"> 
+                <input type="text" class="form-control" id="partial_value" name="partial_value" placeholder="Enter amount">                
+              </div>
+              <div class="col-md-4 mb-0">            
                 <button type="submit" class="btn btn-primary">Save changes</button>
                 <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Close</button>
               </div>
@@ -547,14 +563,18 @@
         <form action="{{url('change-payment-status-upi')}}" method="POST">
           @csrf
           <div class="row g-2 align-items-center">          
-              <div class="col mb-0">  
+              <div class="col-md-4 mb-0">  
                 <input type="hidden" name="token_id" value="{{$token->id}}">          
-                <select id="" class="select2 form-select token-status" name="payment_status" data-allow-clear="true">                
+                <select id="upiMarkPaidSelect" class="select2 form-select token-status" name="payment_status" data-allow-clear="true">                
                   <option value="">Change Status</option>
                   <option value="1">Mark Paid</option>
+                  <option value="2">Partial Payment</option>
                 </select>
               </div>
-              <div class="col mb-0">            
+              <div class="col-md-4 mb-0" id="partial_div_upi" style="display:none;"> 
+                <input type="text" class="form-control" id="partial_value_upi" name="partial_value" placeholder="Enter amount">                
+              </div>
+              <div class="col-md-4 mb-0">            
                 <button type="submit" class="btn btn-primary">Save changes</button>
                 <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Close</button>
               </div>
@@ -583,6 +603,29 @@
   <!-- Edit User Modal -->
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+  
+  	$(document).on('change', '#cashMarkPaidSelect', function(){
+      
+      let paymentSelect = $(this).val();
+      if(paymentSelect == 2){
+        $('#partial_div').fadeIn();
+      }else{
+        $('#partial_div').fadeOut();
+      }
+      
+    });
+  
+  	$(document).on('change', '#upiMarkPaidSelect', function(){
+      
+      let paymentSelect = $(this).val();
+      if(paymentSelect == 2){
+        $('#partial_div_upi').fadeIn();
+      }else{
+        $('#partial_div_upi').fadeOut();
+      }
+      
+    });
+    
     function myFunction(id) {
         const swalWithBootstrapButtons = Swal.mixin({
             customClass: {

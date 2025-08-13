@@ -37,7 +37,9 @@ return new class extends Migration
             $table->tinyInteger('status')->default(1)->nullable();
             $table->rememberToken();
             $table->softDeletes();
-            $table->timestamps();            
+            $table->timestamps();      
+          	
+          	$table->string('fcm_token')->nullable();
         });
     }
 

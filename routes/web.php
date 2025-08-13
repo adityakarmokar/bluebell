@@ -16,6 +16,7 @@ use App\Http\Controllers\PrivacyPolicyController;
 use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\TeamsController;
 use App\Http\Controllers\HomeBannerController;
+use App\Http\Controllers\UserServiceTokenController;
 
 /*
 |--------------------------------------------------------------------------
@@ -96,6 +97,9 @@ Route::group(['middleware'=>'checkauth'], function(){
         Route::post('save-filed-document', [TokenController::class, 'save_filed_document']);
         Route::post('token-check-status', [TokenController::class, 'check_status_token'])->name('token.check.status');
       	Route::post('change-payment-status-upi', [TokenController::class, 'change_payment_status_upi']);
+      
+      	Route::post('token-fetch-amount', [UserServiceTokenController::class, 'token_fetch_amount'])->name('token.fetch.amount');
+      	Route::post('token-submit-amount', [UserServiceTokenController::class, 'token_submit_amount'])->name('token.submit.amount');
 
     });
 
@@ -131,6 +135,12 @@ Route::group(['middleware'=>'checkauth'], function(){
 
     Route::group(['middleware' => ['permission:announcements']], function() { 
         Route::get('announcements', [AnnouncementsController::class, 'index']);
+      
+      	Route::post('announcements', [AnnouncementsController::class, 'store']);
+      
+      	Route::post('announcement-delete', [AnnouncementsController::class, 'destroy']);
+      	Route::post('announcement-fetch', [AnnouncementsController::class, 'fetch']);
+      	Route::post('announcement-notification', [AnnouncementsController::class, 'sendAnnouncement']);
     });
     
 

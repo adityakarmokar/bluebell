@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('action_by')->nullable();
             $table->string('payment')->nullable();
             $table->string('filed_document')->nullable();
+          	$table->double('partially_paid')->nullable();
             $table->softDeletes();
             $table->timestamps();
 

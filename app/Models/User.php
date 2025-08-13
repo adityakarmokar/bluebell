@@ -35,6 +35,7 @@ class User extends Authenticatable
         'password',
         'action_by',
         'status',
+      	'fcm_token'
     ];
 
     /**

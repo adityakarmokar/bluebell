@@ -1,6 +1,5 @@
 /.phpunit.cache
 /node_modules
-.env
 .env.backup
 .env.production
 Homestead.json
@@ -12,3 +11,4 @@ yarn-error.log
 /.idea
 /.vscode
 *.zip
+bluebell-group-firebase-adminsdk-fbsvc-927378495c.json

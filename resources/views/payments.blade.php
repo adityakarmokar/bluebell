@@ -30,7 +30,7 @@
             <div class="justify-content-center text-center">            
                 <span class="kh5">All Payments</span>
                 <div class="d-flex align-items-center my-2">
-                  <h3 class="mb-0 me-2 k-text-black"> {{ $data->count() }} </h3>                              
+                  <h3 class="mb-0 me-2 k-text-black"> {{ $allPayment }} </h3>                              
                 </div>                          
             </div>
           </div>
@@ -75,7 +75,8 @@
   <div class="card">
     <div class="card-header border-bottom">
       <div class="d-flex justify-content-between align-items-center">
-        <h5 class="card-title mb-3">All Payments</h5>        
+        <h5 class="card-title mb-3">All Payments</h5> 
+        <span class="badge bg-primary">Total Consultency Fees:- ₹ {{ number_format($total_sum, 2) ?? '0.00' }}</span>                    	
       </div>      
       <form action="{{ url('payments') }}" method="GET">
         <div class="d-flex justify-content-start align-items-center row">  
@@ -112,7 +113,8 @@
               <label for=""> </label> 
               <a href="{{ url('payments') }}" class="btn btn-secondary mt-3">Reset</a>              
             </div> 
-          </div>                             
+          </div>                      
+          
         </div>
       </form>
     </div>
@@ -125,6 +127,7 @@
             <th>Phone No</th>
             <th>Date</th>            
             <th>Amount </th>
+            <th>Partial</th>
             <th>Token ID</th>
             <th>Transaction Id</th>  
             <th>Status</th>          
@@ -136,12 +139,15 @@
                 <td>{{ $loop->iteration }}</td>
                 <td>{{ optional($payment->user)->fname. " ". optional($payment->user)->mname. " ". optional($payment->user)->lname }}</td>
                 <td>{{ optional($payment->user)->phone }}</td>
-                <td>{{ \Carbon\Carbon::parse($payment->updated_at)->format('d M Y H:i:s')  }}</td>                
+                <td>{{ \Carbon\Carbon::parse($payment->updated_at)->format('d M Y H:i')  }}</td>                
                 <td>
                   ₹ {{ optional($payment->token)->consultency_fees }} 
                   <span class="badge rounded-pill bg-{{ $payment->payment_type == 'By Cash' ? 'success' : ($payment->status == 'pending' ? 'warning' : 'primary') }} bg-glow">{{ $payment->payment_type == 'By Cash' ? 'Cash' : ($payment->status == 'pending' ? 'pending' : ($payment->payment_type == 'By UPI' ? 'UPI' : 'Online')) }}</span> 
                   <span class="badge rounded-pill bg-info bg-glow">{{ $payment->payment_method }}</span>
                 
+                </td>
+                <td>
+                	₹ {{ optional($payment->token)->partially_paid ?? 'N/A' }}
                 </td>
                 <td>
                   {{ optional($payment->token)->token ?? 'N/A' }}

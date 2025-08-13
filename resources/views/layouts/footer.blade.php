@@ -12,7 +12,8 @@ a
     <!-- Drag Target Area To SlideIn Menu On Small Screens -->
     <div class="drag-target"></div>
     
-  </div>
+  </div>  
+
   <!-- / Layout wrapper -->
 
   <script src="../../assets/vendor/libs/popper/popper.js"></script>
@@ -293,7 +294,89 @@ a
         }
         
       });            
+      
+      $(document).on('click', '#change_payment_amount_button', function(){  
+        
+        let tokeId = $('#change_payment_amount_button').data('tokenid');        
+          
+        $.ajax({
+          url: "{{route('token.fetch.amount')}}",   
+          method: 'POST',
+          data: {
+            tokenId: tokeId,
+            _token: '{{ csrf_token() }}',
+          },
+          success: function(response)
+          {
 
+            if(response.status == true){
+              $('#tokenId_amount').val(tokeId);
+              $('#refund_amount_amount').val(response.data.refund_amount);
+              $('#payable_amount_amount').val(response.data.payable_amount);
+              $('#consultency_fees_amount').val(response.data.consultency_fees);
+            }
+            
+          }
+        }); 
+
+      }); 
+      
+      $(document).on('submit', '#tokenAmountForm', function(){  
+        
+        let tokenId = $('#tokenId_amount').val();
+        let refund_amount = $('#refund_amount_amount').val();
+        let payable_amount = $('#payable_amount_amount').val();
+        let consultency_fees_amount = $('#consultency_fees_amount').val();        
+          
+        $.ajax({
+          url: "{{route('token.submit.amount')}}",   
+          method: 'POST',
+          data: {
+            tokenId: tokenId,
+            refund_amount: refund_amount,
+            payable_amount: payable_amount,
+            consultency_fees_amount: consultency_fees_amount,
+            _token: '{{ csrf_token() }}',
+          },
+          success: function(response)
+          {
+
+            if(response.status == true){
+              toastr.success(response.message);
+              window.location.reload();
+            }else if(response.status == false){
+              toastr.error(response.message);
+            }
+            
+          }
+        }); 
+
+      }); 
+      
+	  $(document).on('keyup', '#refund_amount_amount', function() {
+          let value = $(this).val();
+
+          // Trim the value to handle spaces
+          if ($.trim(value) !== '') {
+              // Only reset these fields if they exist
+              if ($('#payable_amount_amount').length) {
+                  $('#consultency_fees_amount').val('');
+              }
+              
+          }
+      });
+      
+      $(document).on('keyup', '#payable_amount_amount', function(){
+        let value = $(this).val();
+        
+        if ($.trim(value) !== '') {          
+          if ($('#refund_amount_amount').length) {
+            $('#refund_amount_amount').val('');
+          }
+
+        }
+        
+      });            
 
     </script>
 

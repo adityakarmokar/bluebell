@@ -11,6 +11,7 @@ use App\Http\Controllers\ContactUsController;
 use App\Http\Controllers\PrivacyPolicyController;
 use App\Http\Controllers\TokenController;
 use App\Http\Controllers\HomeBannerController;
+use App\Http\Controllers\AnnouncementsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,7 +56,11 @@ Route::middleware('auth:sanctum')->group(function(){
   
   	Route::get('download-filed-document', [UserServiceTokenController::class, 'download_filed_document']);
   	Route::get('payment-history', [UserServiceTokenController::class, 'payment_history']);
+  
+  	Route::get('token-journey', [UserServiceTokenController::class, 'token_journey']);
+  	Route::get('fetch-token-documents', [UserServiceTokenController::class, 'fetch_token_documents']);
 
+  	Route::get('fetch-announcements', [AnnouncementsController::class, 'fetch_all_announcements']);
 });
 
 

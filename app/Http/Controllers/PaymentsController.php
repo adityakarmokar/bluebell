@@ -18,6 +18,7 @@ class PaymentsController extends Controller
         $endDate = $request->endDate ?? null; 
       	$payment_type = $request->payment_type ?? null; 
       
+      	$allPayment = Payment::count();
       	$pending = Payment::where('status', 'pending')->count();
       	$completed = Payment::where('status', 'completed')->count();
 
@@ -51,10 +52,15 @@ class PaymentsController extends Controller
             $query = $query->where('payment_type', $payment_type);
         }
       
-      	$data = $query->orderBy('id', 'DESC')->get();          
+      	$data = $query->orderBy('id', 'DESC')->get();   
+      
+      	$total_sum = 0.00;
+      	$total_sum = $data->sum(function($e){
+          return $e->token->consultency_fees ?? 0.00;
+        });
 
         // $data = Payment::with('user')->orderBy('id', 'DESC')->get();
-        return view('payments', compact('data', 'pending', 'completed', 'custom_date', 'startDate', 'endDate', 'payment_type'));
+        return view('payments', compact('allPayment', 'data', 'pending', 'completed', 'custom_date', 'startDate', 'endDate', 'payment_type', 'total_sum'));
     }
   
   	public function index1(Request $request)

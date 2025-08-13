@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
 use App\Models\Payment;
+use App\Models\PaymentHistory;
 
 class TokenController extends Controller
 {
@@ -642,7 +643,72 @@ class TokenController extends Controller
         ]);
 
         $token = Token::find($request->token_id);
-        if($request->payment_status == 1){
+      	$partial_value = $request->partial_value ?? null;
+      	if($partial_value){
+          
+          $token->partially_paid += $partial_value ?? 0;
+          if($token->save()){  
+            
+            PaymentHistory::create([
+              'token_id' => $token->id ?? null,
+              'user_id' => $token->user_id ?? null,
+              'service_id' => $token->service_id ?? null,
+              'amount' => $partial_value ?? null,
+              'type' => 'Cash' ?? null,
+            ]);            
+          }
+          
+          	$user = User::where('id', $token->user_id)->first();
+          
+          	$phone = "91".$user->phone;
+          	$template_id = "1007959693760176592";
+            $authkey = "453025Azs5VZhDaFf682db06dP1";                                
+            $data = [
+              "template_id" => $template_id,
+              "recipients" => [
+                [
+                  "mobiles" => (string)$phone,                  
+                ]
+              ]
+            ];
+
+            $payload = json_encode($data);
+            \Log::debug('payload', ['payload' => $data]); 
+            
+            $curl = curl_init();
+
+            curl_setopt_array($curl, [
+              CURLOPT_URL => "https://control.msg91.com/api/v5/flow",
+              CURLOPT_RETURNTRANSFER => true,
+              CURLOPT_ENCODING => "",
+              CURLOPT_MAXREDIRS => 10,
+              CURLOPT_TIMEOUT => 30,
+              CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+              CURLOPT_CUSTOMREQUEST => "POST",
+              CURLOPT_POSTFIELDS => $payload,
+              CURLOPT_HTTPHEADER => [
+                "accept: application/json",
+                "authkey: $authkey",
+                "content-type: application/json"
+              ],
+            ]);
+
+            $response = curl_exec($curl);
+            $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+            $error = curl_error($curl);
+
+            curl_close($curl);               
+
+            if ($error) {
+              \Log::debug('Payment', ['error' => $error]);                    
+            } else {
+              \Log::debug('Payment', ['success' => $response, 'http'=>$http_code]);                    
+            }
+          
+          return redirect()->back()->with('success', 'Partial Payment amount updated');
+        }
+          
+          if($request->payment_status == 1){
             TokenStatus::create([
                 'token_id'=>$token->id,
                 'status'=>5,
@@ -659,6 +725,16 @@ class TokenController extends Controller
                 'amount' => $amount,
                 'status' => 'completed',              
               ]);
+              
+              PaymentHistory::create([
+                'token_id' => $token->id ?? null,
+                'user_id' => $token->user_id ?? null,
+                'service_id' => $token->service_id ?? null,
+                'amount' => $partial_value ?? null,
+                'type' => 'Cash' ?? null,
+                'status' => 'Marked Paid' ?? null,
+              ]);
+              
             }else{
                Payment::create([
                 'token_id' => $request->token_id,
@@ -669,16 +745,27 @@ class TokenController extends Controller
                 'amount' => $amount,
                 'status' => 'completed',              
               ]); 
+              
+              PaymentHistory::create([
+                'token_id' => $token->id ?? null,
+                'user_id' => $token->user_id ?? null,
+                'service_id' => $token->service_id ?? null,
+                'amount' => $partial_value ?? null,
+                'type' => 'Cash' ?? null,
+                'status' => 'Marked Paid' ?? null,
+              ]);
+              
             }          	
 
             $token->update([
                 'payment' => 'Cash',
-            ]);
+            ]);                    
+      	
           
           	$user = User::where('id', $token->user_id)->first();
           
           	$phone = "91".$user->phone;
-          	$template_id = "682ee0c2d6fc0518190e2572";
+          	$template_id = "1007959693760176592";
             $authkey = "453025Azs5VZhDaFf682db06dP1";                                
             $data = [
               "template_id" => $template_id,
@@ -722,7 +809,7 @@ class TokenController extends Controller
               \Log::debug('Payment', ['success' => $response, 'http'=>$http_code]);                    
             }
 
-            return redirect()->back()->with('success', 'Payment Status Changed');
+            return redirect()->back()->with('success', 'Payment updated');
         }
 
     }
@@ -739,6 +826,72 @@ class TokenController extends Controller
         ]);
 
         $token = Token::find($request->token_id);
+      	$partial_value = $request->partial_value ?? null;
+      	if($partial_value){
+          
+          $token->partially_paid += $partial_value ?? 0;
+          if($token->save()){   
+            
+            PaymentHistory::create([
+              'token_id' => $token->id ?? null,
+              'user_id' => $token->user_id ?? null,
+              'service_id' => $token->service_id ?? null,
+              'amount' => $partial_value ?? null,
+              'type' => 'UPI' ?? null,
+            ]);
+            
+            $user = User::where('id', $token->user_id)->first();
+          
+          	$phone = "91".$user->phone;
+          	$template_id = "1007959693760176592";
+            $authkey = "453025Azs5VZhDaFf682db06dP1";                                
+            $data = [
+              "template_id" => $template_id,
+              "recipients" => [
+                [
+                  "mobiles" => (string)$phone,                  
+                ]
+              ]
+            ];
+
+            $payload = json_encode($data);
+            \Log::debug('payload', ['payload' => $data]); 
+            
+            $curl = curl_init();
+
+            curl_setopt_array($curl, [
+              CURLOPT_URL => "https://control.msg91.com/api/v5/flow",
+              CURLOPT_RETURNTRANSFER => true,
+              CURLOPT_ENCODING => "",
+              CURLOPT_MAXREDIRS => 10,
+              CURLOPT_TIMEOUT => 30,
+              CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+              CURLOPT_CUSTOMREQUEST => "POST",
+              CURLOPT_POSTFIELDS => $payload,
+              CURLOPT_HTTPHEADER => [
+                "accept: application/json",
+                "authkey: $authkey",
+                "content-type: application/json"
+              ],
+            ]);
+
+            $response = curl_exec($curl);
+            $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+            $error = curl_error($curl);
+
+            curl_close($curl);               
+
+            if ($error) {
+              \Log::debug('Payment', ['error' => $error]);                    
+            } else {
+              \Log::debug('Payment', ['success' => $response, 'http'=>$http_code]);                    
+            }
+            
+            return redirect()->back()->with('success', 'Partial Payment amount updated');
+          }
+          
+        }
+      
         if($request->payment_status == 1){
             TokenStatus::create([
                 'token_id'=>$token->id,
@@ -756,6 +909,15 @@ class TokenController extends Controller
                   'amount' => $amount,
                   'status' => 'completed',              
                 ]);
+              
+              	PaymentHistory::create([
+                  'token_id' => $token->id ?? null,
+                  'user_id' => $token->user_id ?? null,
+                  'service_id' => $token->service_id ?? null,
+                  'amount' => $partial_value ?? null,
+                  'type' => 'UPI' ?? null,
+                  'status' => 'Marked Paid' ?? null,
+                ]);
               	  
             }else{
              	
@@ -768,6 +930,16 @@ class TokenController extends Controller
                   'amount' => $amount,
                   'status' => 'completed',              
                 ]); 
+              
+              	PaymentHistory::create([
+                  'token_id' => $token->id ?? null,
+                  'user_id' => $token->user_id ?? null,
+                  'service_id' => $token->service_id ?? null,
+                  'amount' => $partial_value ?? null,
+                  'type' => 'UPI' ?? null,
+                  'status' => 'Marked Paid' ?? null,
+                ]);
+              
             }          	
 
             $token->update([
@@ -777,7 +949,7 @@ class TokenController extends Controller
 			$user = User::where('id', $token->user_id)->first();
           
           	$phone = "91".$user->phone;
-          	$template_id = "682ee0c2d6fc0518190e2572";
+          	$template_id = "1007959693760176592";
             $authkey = "453025Azs5VZhDaFf682db06dP1";                                
             $data = [
               "template_id" => $template_id,

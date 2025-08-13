@@ -605,7 +605,7 @@ class UserController extends Controller
             	
       
         if($user->otp_expires_at >= now()) {			
-            
+            $user->tokens()->delete();
             $user_token = $user->createToken('WebToken')->plainTextToken;
             
             User::where('phone', $request->phone)->orWhere('pan_no', $request->pan_no)->update([
@@ -616,6 +616,7 @@ class UserController extends Controller
 
             $user->user_token = $user_token;
 			$user->phone_verified_at = now();
+          	$user->fcm_token = $request->fcm_token ?? null;
           	$user->save();
             
             return response()->json(['message'=>'success','status'=>true, 'data'=>$user], 200);

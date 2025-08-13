@@ -140,7 +140,7 @@
           <label class="form-label" for="phone">Phone No</label>
           <div class="input-group">   
             <span class="input-group-text">IN (+91)</span>  
-            <input type="number" name="phone" id="phone" class="form-control k-readonly" value="{{ $data->phone }}" required readonly />            
+            <input type="number" name="phone" id="phone" class="form-control" value="{{ $data->phone }}" required />            
           </div>
           <span style="color: green" id="phoner_validation"></span>
           @error('phone')

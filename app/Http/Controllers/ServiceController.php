@@ -28,8 +28,7 @@ class ServiceController extends Controller
             'service_icon' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,avif,svg|max:2048',
             'service_banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,avif,svg|max:5048',
             'service_price' => 'nullable',
-            'service_details' => 'nullable|string',
-            'group-a' => 'required|array',             
+            'service_details' => 'nullable|string'                     
         ]);
         
         $service = new Service();
@@ -53,25 +52,7 @@ class ServiceController extends Controller
         }
         $service->action_by = 'Admin';
         $service->status = 1;
-        $service->save();
-
-        foreach ($data['group-a'] as $serviceDoc) {
-            $docIconPath = null;
-        
-            if (isset($serviceDoc['doc_icon']) && is_file($serviceDoc['doc_icon'])) {
-                $image = $serviceDoc['doc_icon'];
-                $imageName = 'Service_' . rand() . '.' . $image->getClientOriginalExtension();
-                $image->move(public_path('uploads/service'), $imageName);
-                $docIconPath = 'service/' . $imageName;
-            }
-        
-            ServiceDocument::create([
-                'service_id' => $service->id,
-                'doc_name' => $serviceDoc['doc_name'],
-                'doc_icon' => $docIconPath, 
-                'action_by' => 'Admin',
-            ]);
-        }        
+        $service->save();        
 
         return redirect()->to('services')->with('success', 'Service details saved successfully');
 
@@ -93,15 +74,13 @@ class ServiceController extends Controller
     }
 
     public function update(Request $request, Service $service)
-    {
-        // dd($request->all());
+    {        
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'service_icon' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,avif,svg|max:2048',
             'service_banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,avif,svg|max:5048',
             'service_price' => 'nullable',
             'service_details' => 'nullable|string',
-            'group-a' => 'required|array',             
         ]);
 
         $service->name = $data['name'];
@@ -122,49 +101,7 @@ class ServiceController extends Controller
             $service->service_banner = 'service/'. $imageName;
         }
         $service->action_by = 'Admin';
-        $service->save();
-
-
-        foreach ($data['group-a'] as $serviceDoc) {
-            if(!empty($serviceDoc['doc_name'])){
-                
-                $docIconPath = null;
-
-                if (isset($serviceDoc['doc_icon']) && $serviceDoc['doc_icon']->isValid()) {
-                    $image = $serviceDoc['doc_icon'];
-                    $imageName = 'Service_' . rand() . '.' . $image->getClientOriginalExtension();
-                    $image->move(public_path('uploads/service'), $imageName);
-                    $docIconPath = 'service/' . $imageName;
-                }else{
-                    if(!empty($serviceDoc['doc_icon_hidden'])){
-                        $docIconPath = $serviceDoc['doc_icon_hidden'];
-                    }                    
-                }
-
-                $dataToUpdate = [                    
-                    'service_id' => $service->id,
-                    'doc_name' => $serviceDoc['doc_name'],
-                    'action_by' => 'Admin',
-                ];
-
-                if ($docIconPath !== null) {
-                    $dataToUpdate['doc_icon'] = $docIconPath;
-                }
-
-                if(isset($serviceDoc['doc_id'])){
-                    ServiceDocument::updateOrCreate(
-                        ['id' => $serviceDoc['doc_id']],
-                        $dataToUpdate
-                    );
-                }else{
-                    ServiceDocument::create(
-                        $dataToUpdate
-                    );
-                }
-                
-            }
-            
-        }
+        $service->save();        
 
         return redirect()->to('services')->with('success', 'Service details updated successfully');
 
